@@ -14,10 +14,10 @@ on:
 env:
   TF_VERSION: 1.5.7
   TF_LOG: DEBUG
-  TF_VAR_client_id: ${{ secrets.ARM_CLIENT_ID }}
-  TF_VAR_client_secret: ${{ secrets.ARM_CLIENT_SECRET }}
-  TF_VAR_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-  TF_VAR_tenant_id: ${{ secrets.ARM_TENANT_ID }}
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
 jobs:
   plan:
@@ -36,6 +36,14 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: ${{ env.TF_VERSION }}
+      
+      - name: Map Environment Secrets to Terraform Variables
+        env:
+          TF_VAR_client_id: ${{ secrets.ARM_CLIENT_ID }}
+          TF_VAR_client_secret: ${{ secrets.ARM_CLIENT_SECRET }}
+          TF_VAR_subscription_id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+          TF_VAR_tenant_id: ${{ secrets.ARM_TENANT_ID }}
+        run: echo "Terraform variables mapped."
 
       - name: Terraform Init
         run: terraform init
