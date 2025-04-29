@@ -1,6 +1,6 @@
 variable "storage_account_name" {
   type    = string
-  default = "tf-storage-account-dev"
+  default = "tfdev22893" # Storage account name for dev environment
 }
 
 variable "resource_group_name" {
