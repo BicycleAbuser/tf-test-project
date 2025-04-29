@@ -9,7 +9,7 @@ provider "azurerm" {
 
 # Define the resource group for the dev environment
 resource "azurerm_resource_group" "dev_rg" {
-  name     = "terraform-project-dev-rg"
+  name     = var.resource_group_name
   location = var.location
 }
 

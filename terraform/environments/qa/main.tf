@@ -9,7 +9,7 @@ provider "azurerm" {
 
 # Define the resource group for the qa environment
 resource "azurerm_resource_group" "qa_rg" {
-  name     = "terraform-project-qa-rg"
+  name     = var.resource_group_name
   location = var.location
 }
 
