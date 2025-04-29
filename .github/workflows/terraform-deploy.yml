@@ -1,9 +1,6 @@
 name: Terraform Deploy
 
 on:
-  #push:
-  #  branches:
-  #    - main  # on push to main
   workflow_dispatch:
     inputs:
       environment:
@@ -13,6 +10,7 @@ on:
         options:
           - dev
           - qa
+
 env:
   TF_VERSION: 1.5.7
 
@@ -20,10 +18,10 @@ jobs:
   plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
-
+    environment: ${{ inputs.environment }}
     outputs:
-      selected_env: ${{ steps.detect.outputs.selected_env }}
-      deploy_path: ${{ steps.detect.outputs.deploy_path }}
+      selected_env: ${{ inputs.environment }}
+      deploy_path: ${{ inputs.environment }}
     
     steps:
       - name: Checkout
@@ -39,47 +37,19 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Detect Changed Folder
-        id: detect
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "Manual trigger detected."
-            echo "selected_env=${{ inputs.environment }}" >> $GITHUB_ENV
-            echo "deploy_path=${{ inputs.environment }}" >> $GITHUB_ENV
-            echo "::set-output name=selected_env::${{ inputs.environment }}"
-            echo "::set-output name=deploy_path::${{ inputs.environment }}"
-          else
-            echo "Automatic push detected."
-            CHANGED_DIRS=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | grep '^dev\|^qa' | cut -d/ -f1 | sort -u)
-            echo "Changed directories: $CHANGED_DIRS"
-
-            COUNT=$(echo "$CHANGED_DIRS" | wc -l)
-
-            if [[ "$COUNT" -ne 1 ]]; then
-              echo "Error: Changes detected in multiple environments or none. Aborting."
-              exit 1
-            fi
-
-            ENVIRONMENT=$(echo "$CHANGED_DIRS" | head -n1)
-            echo "selected_env=$ENVIRONMENT" >> $GITHUB_ENV
-            echo "deploy_path=$ENVIRONMENT" >> $GITHUB_ENV
-            echo "::set-output name=selected_env::$ENVIRONMENT"
-            echo "::set-output name=deploy_path::$ENVIRONMENT"
-          fi
-
       - name: Terraform Init
         run: terraform init
-        working-directory: terraform/environments/${{ steps.detect.outputs.deploy_path }}
+        working-directory: terraform/environments/${{ inputs.environment }}
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
-        working-directory: terraform/environments/${{ steps.detect.outputs.deploy_path }}
+        working-directory: terraform/environments/${{ inputs.environment }}
 
       - name: Upload Plan
         uses: actions/upload-artifact@v4
         with:
-          name: tfplan-${{ steps.detect.outputs.selected_env }}
-          path: terraform/environments/${{ steps.detect.outputs.deploy_path }}/tfplan
+          name: tfplan-${{ inputs.environment }}
+          path: terraform/environments/${{ inputs.environment }}/tfplan
 
   apply:
     name: Terraform Apply
@@ -105,12 +75,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tfplan-${{ needs.plan.outputs.selected_env }}
-          path: ./${{ needs.plan.outputs.deploy_path }}
+          path: terraform/environments/${{ needs.plan.outputs.selected_env }}
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./${{ needs.plan.outputs.deploy_path }}
+        working-directory: terraform/environments/${{ needs.plan.outputs.selected_env }}
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
-        working-directory: ./${{ needs.plan.outputs.deploy_path }}
+        working-directory: terraform/environments/${{ needs.plan.outputs.selected_env }}
