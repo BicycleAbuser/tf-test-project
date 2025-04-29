@@ -69,17 +69,17 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./${{ steps.detect.outputs.deploy_path }}
+        working-directory: terraform/environments/${{ steps.detect.outputs.deploy_path }}
 
       - name: Terraform Plan
         run: terraform plan -out=tfplan
-        working-directory: ./${{ steps.detect.outputs.deploy_path }}
+        working-directory: terraform/environments/${{ steps.detect.outputs.deploy_path }}
 
       - name: Upload Plan
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-${{ steps.detect.outputs.selected_env }}
-          path: ./${{ steps.detect.outputs.deploy_path }}/tfplan
+          path: terraform/environments/${{ steps.detect.outputs.deploy_path }}/tfplan
 
   apply:
     name: Terraform Apply
