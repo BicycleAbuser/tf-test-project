@@ -18,7 +18,5 @@ resource "azurerm_kubernetes_cluster" "aks" {
     network_plugin = var.aks_network_plugin
   }
 
-  # api_server_authorized_ip_ranges is not supported here and has been removed
-
   tags = var.tags
 }

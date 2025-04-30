@@ -7,7 +7,7 @@ provider "azurerm" {
   subscription_id = var.subscription_id
 }
 
-# Define the resource group for the dev environment
+# Resource group for the dev environment
 resource "azurerm_resource_group" "dev_rg" {
   name     = var.resource_group_name
   location = var.location
@@ -31,7 +31,7 @@ module "aks" {
   aks_node_count          = 2
   aks_node_vm_size        = "Standard_B2s"
   aks_network_plugin      = "azure"
-  api_server_authorized_ip_ranges = ["203.0.113.0/24"] # Replace with your IP range
+  api_server_authorized_ip_ranges = ["203.0.113.0/24"] # Default IP range for AKS API server access
   tags = {
     environment = "dev"
   }
