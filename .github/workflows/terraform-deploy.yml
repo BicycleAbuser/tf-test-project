@@ -48,7 +48,7 @@ jobs:
       
       - name: Set enable_aks Variable
         if: ${{ inputs.environment == 'dev' && inputs.enable_aks }}
-        run: echo "TF_VAR_enable_aks=" >> $GITHUB_ENV
+        run: echo "TF_VAR_enable_aks=1" >> $GITHUB_ENV
         
       - name: Terraform Init
         run: terraform init
