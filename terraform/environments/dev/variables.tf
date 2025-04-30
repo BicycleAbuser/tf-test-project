@@ -48,8 +48,9 @@ variable "aks_node_count" {
 }
 
 variable "aks_node_vm_size" {
-  type    = string
-  default = "Standard_DS2_v2"
+  type        = string
+  description = "The size of the VMs in the default node pool"
+  default     = "Standard_B2s" 
 }
 
 variable "aks_network_plugin" {
